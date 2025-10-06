@@ -9,8 +9,8 @@ func AuthRouter(r *gin.Engine) {
 	authRoutes := r.Group("/auth")
 	
 	{
-		authRoutes.POST("/login", handlers.LoginHandler)
-		authRoutes.POST("/register", handlers.RegisterHandler)
+		authRoutes.POST("/login", handlers.LoginHandlerToDB)
+		authRoutes.POST("/register", handlers.RegisterUserToDB)
 	}
 
 }

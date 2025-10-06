@@ -7,6 +7,6 @@ import (
 )
 
 func ProductsRouter(router *gin.Engine) {
-	router.GET("/products", middlewares.AuthMiddleware(), handlers.GetProducts)
+	router.GET("/products", middlewares.AuthMiddleware(), handlers.GetProductFromDB)
 	router.POST("/add-product", middlewares.AuthMiddleware(), handlers.AddProduct)
 }
