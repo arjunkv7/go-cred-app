@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"fmt"
+
 	//"fmt"
 	"go-cred-app/config"
 	"go-cred-app/models"
@@ -12,10 +13,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func GetProducts(c *gin.Context) {
-	productId:= c.Query("productId")
+	productId := c.Query("productId")
 	for _, product := range store.Products {
 		if product.Productid == productId {
 			c.JSON(http.StatusOK, product)
@@ -36,7 +38,7 @@ func GetProductFromDB(c *gin.Context) {
 		result := config.DbClient.Collection("products").FindOne(context, bson.M{"productid": productId})
 		result.Decode(&product)
 		products = append(products, product)
-		
+
 	} else {
 		// var product models.Products
 		cursor, err := config.DbClient.Collection("products").Find(context, bson.M{})
@@ -54,7 +56,7 @@ func GetProductFromDB(c *gin.Context) {
 		// c.JSON(http.StatusOK, products)
 		fmt.Println(products)
 	}
-	
+
 	c.JSON(http.StatusOK, products)
 }
 
@@ -89,11 +91,15 @@ func AddProductToDB(c *gin.Context) {
 	var productExists models.Products
 
 	err := config.DbClient.Collection("products").FindOne(context, bson.M{"productid": product.Productid}).Decode(&productExists)
-	if err != nil {
+	fmt.Println("productExists: ", productExists)
+	fmt.Println("err: ", err)
+	if err == mongo.ErrNoDocuments {
+		config.DbClient.Collection("products").InsertOne(context, product)
+		c.JSON(http.StatusOK, gin.H{"message": "Product added to database"})
+		return
+
+	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Product already exists"})
 		return
 	}
-
-	config.DbClient.Collection("products").InsertOne(context, product)
-	c.JSON(http.StatusOK, gin.H{"message": "Product added to database"})
 }
